@@ -12,24 +12,33 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-APP="mert"
-EXE="mert"
+APP = mert
+EXE = bin/mert
 
 SHELL = /bin/bash
 
 DIR = $(shell pwd)
 
+DOCKER = docker
+
 GB = gb
+
+GOX = gox -os="linux freebsd openbsd netbsd"
+
+BINTRAY_URI = https://api.bintray.com
+BINTRAY_USERNAME = nlamirault
+BINTRAY_REPOSITORY= oss
 
 NO_COLOR=\033[0m
 OK_COLOR=\033[32;01m
 ERROR_COLOR=\033[31;01m
 WARN_COLOR=\033[33;01m
 
-SRC=src/github.com/nlamirault/aneto
+SRC = src/github.com/nlamirault/mert
 
 SRCS = $(shell git ls-files '*.go' | grep -v '^vendor/')
 PKGS = $(shell find src -type f -print0 | xargs -0 -n 1 dirname | sort -u|sed -e "s/^src\///g")
+EXE = $(shell ls mert_*)
 
 VERSION=$(shell \
         grep "const Version" $(SRC)/version/version.go \
@@ -44,14 +53,14 @@ all: help
 
 help:
 	@echo -e "$(OK_COLOR)==== $(APP) [$(VERSION)] ====$(NO_COLOR)"
-	@echo -e "$(WARN_COLOR)init$(NO_COLOR)     :  Install requirements"
-	@echo -e "$(WARN_COLOR)build$(NO_COLOR)    :  Make all binaries"
-	@echo -e "$(WARN_COLOR)test$(NO_COLOR)     :  Launch unit tests"
-	@echo -e "$(WARN_COLOR)lint$(NO_COLOR)     :  Launch golint"
-	@echo -e "$(WARN_COLOR)vet$(NO_COLOR)      :  Launch go vet"
-	@echo -e "$(WARN_COLOR)coverage$(NO_COLOR) :  Launch code coverage"
-	@echo -e "$(WARN_COLOR)clean$(NO_COLOR)    :  Cleanup"
-	@echo -e "$(WARN_COLOR)release$(NO_COLOR)  :  Make a new release"
+	@echo -e "$(WARN_COLOR)init$(NO_COLOR)      :  Install requirements"
+	@echo -e "$(WARN_COLOR)build$(NO_COLOR)     :  Make all binaries"
+	@echo -e "$(WARN_COLOR)test$(NO_COLOR)      :  Launch unit tests"
+	@echo -e "$(WARN_COLOR)lint$(NO_COLOR)      :  Launch golint"
+	@echo -e "$(WARN_COLOR)vet$(NO_COLOR)       :  Launch go vet"
+	@echo -e "$(WARN_COLOR)coverage$(NO_COLOR)  :  Launch code coverage"
+	@echo -e "$(WARN_COLOR)clean$(NO_COLOR)     :  Cleanup"
+	@echo -e "$(WARN_COLOR)binaries$(NO_COLOR)  :  Make binaries"
 
 clean:
 	@echo -e "$(OK_COLOR)[$(APP)] Cleanup$(NO_COLOR)"
@@ -64,6 +73,8 @@ init:
 	@go get -u github.com/constabulary/gb/...
 	@go get -u github.com/golang/lint/golint
 	@go get -u github.com/kisielk/errcheck
+	@go get -u golang.org/x/tools/cmd/oracle
+	@go get -u github.com/mitchellh/gox
 
 .PHONY: build
 build:
@@ -77,30 +88,39 @@ test:
 
 .PHONY: lint
 lint:
-	@echo -e "$(OK_COLOR)[$(APP)] go lint $(NO_COLOR)"
 	@$(foreach file,$(SRCS),golint $(file) || exit;)
 
 .PHONY: vet
 vet:
-	@echo -e "$(OK_COLOR)[$(APP)] go vet $(NO_COLOR)"
 	@$(foreach file,$(SRCS),go vet $(file) || exit;)
+
+.PHONY: errcheck
+errcheck:
+	@echo -e "$(OK_COLOR)[$(APP)] Go Errcheck $(NO_COLOR)"
+	@$(foreach pkg,$(PKGS),env GOPATH=`pwd`:`pwd`/vendor errcheck $(pkg) || exit;)
 
 .PHONY: coverage
 coverage:
-	@echo -e "$(OK_COLOR)[$(APP)] Code coverage $(NO_COLOR)"
 	@$(foreach pkg,$(PKGS),env GOPATH=`pwd`:`pwd`/vendor go test -cover $(pkg) || exit;)
 
-.PHONY: release
-release: clean build test lint vet
-	@echo -e "$(OK_COLOR)[$(APP)] Make archive $(VERSION) $(NO_COLOR)"
-	@rm -fr $(PACKAGE) && mkdir $(PACKAGE)
-	@cp -r $(EXE) $(PACKAGE)
-	@tar cf $(ARCHIVE) $(PACKAGE)
-	@gzip $(ARCHIVE)
-	@rm -fr $(PACKAGE)
-	@addons/github.sh $(VERSION)
+gox:
+	@echo -e "$(OK_COLOR)[$(APP)] Create binaries $(NO_COLOR)"
+	GOPATH=`pwd`:`pwd`/vendor $(GOX) github.com/nlamirault/mert
+
+foo:
+	echo $(GOX_PKGS)
+
+.PHONY: binaries
+binaries: gox
+	@echo -e "$(OK_COLOR)[$(APP)] Upload binaries to Bintray $(NO_COLOR)"
+	for i in $(EXE); do \
+		curl -T $$i \
+			-u$(BINTRAY_USERNAME):$(BINTRAY_APIKEY) \
+			"$(BINTRAY_URI)/content/$(BINTRAY_USERNAME)/$(BINTRAY_REPOSITORY)/$(APP)/${VERSION}/$$i;publish=1"; \
+        done
+
 
 # for goprojectile
 .PHONY: gopath
 gopath:
-	@echo `pwd`:`pwd`/vendor
+	@echo GOPATH=`pwd`:`pwd`/vendor
