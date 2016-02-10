@@ -40,3 +40,40 @@ func (t Terminal) Fork(args []string) {
 func (t Terminal) GetIconTitle() string {
 	return C.GoString(C.vte_terminal_get_icon_title(C.toVTerminal(t.Widget)))
 }
+
+func (t Terminal) SetFont(font string) {
+	C.vte_terminal_set_font_from_string(C.toVTerminal(t.Widget), C.CString(font))
+}
+
+func createColor(pattern string) C.GdkColor {
+	var color C.GdkColor
+	ptr := C.CString(pattern)
+	defer C.free(unsafe.Pointer(ptr))
+	C.gdk_color_parse(C.toGstr(ptr), &color)
+	return color
+}
+
+func (t Terminal) SetColors(foreground string, background string, palette []string) {
+	fColor := createColor(foreground)
+	bColor := createColor(background)
+	pColors := new([16]C.GdkColor)
+	for i := 0; i < len(pColors); i++ {
+		C.gdk_color_parse((*C.gchar)(C.CString(palette[i])), &pColors[i])
+	}
+	C.vte_terminal_set_colors(C.toVTerminal(t.Widget), &fColor, &bColor, (*C.GdkColor)(unsafe.Pointer(pColors)), 16)
+}
+
+func (t Terminal) SetColorCursor(pattern string) {
+	color := createColor(pattern)
+	C.vte_terminal_set_color_cursor(C.toVTerminal(t.Widget), &color)
+}
+
+// func (t Terminal) SetColorForeground(pattern string) {
+// 	color := createColor(pattern)
+// 	C.vte_terminal_set_color_foreground(C.toVTerminal(t.Widget), &color)
+// }
+
+// func (t Terminal) SetColorBackground(pattern string) {
+// 	color := createColor(pattern)
+// 	C.vte_terminal_set_color_background(C.toVTerminal(t.Widget), &color)
+// }

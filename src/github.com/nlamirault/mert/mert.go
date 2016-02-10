@@ -17,13 +17,15 @@ package main
 import (
 	"flag"
 	"fmt"
-	// "log"
+	"log"
 	"os"
+	"path/filepath"
 
 	"github.com/mattn/go-gtk/gdk"
 	"github.com/mattn/go-gtk/glib"
 	"github.com/mattn/go-gtk/gtk"
 
+	"github.com/nlamirault/mert/config"
 	"github.com/nlamirault/mert/version"
 	"github.com/nlamirault/mert/vte3"
 )
@@ -33,7 +35,7 @@ const (
 	defaultWinWidth  = 1024
 	defaultWinHeight = 768
 
-	homePage = "https://github.com/nlamirault"
+	defaultConfigurationFile = ".config/mert/mert.toml"
 )
 
 var (
@@ -50,6 +52,18 @@ func getApplicationTitle() string {
 	return fmt.Sprintf("%s - v%s", application, version.Version)
 }
 
+func getConfigurationFile() string {
+	return filepath.Join(os.Getenv("HOME"), defaultConfigurationFile)
+}
+
+func configure(t vte3.Terminal, conf *config.Configuration) {
+	t.SetFont(conf.Font)
+	t.SetColors(conf.Theme.Foreground, conf.Theme.Background, conf.Theme.Palette)
+	// t.SetColorForeground(conf.Theme.Foreground)
+	// t.SetColorBackground(conf.Theme.Background)
+	t.SetColorCursor(conf.Theme.Cursor)
+}
+
 func runGUI(argv []string) {
 	window := gtk.NewWindow(gtk.WINDOW_TOPLEVEL)
 	window.SetTitle(getApplicationTitle())
@@ -59,12 +73,18 @@ func runGUI(argv []string) {
 	widget := terminal.VteToGtk()
 	terminal.Fork(argv)
 	widget.Connect("child-exited", gtk.MainQuit)
-	// widget.Connect("child-exited", widget.Destroy)
 
 	window.Add(widget)
 
 	window.SetSizeRequest(defaultWinWidth, defaultWinHeight)
 	window.ShowAll()
+
+	conf, err := config.Load(getConfigurationFile())
+	if err != nil {
+		log.Printf("[WARN] No configuration file or invalid configuration. Use default settings")
+		conf = config.New()
+	}
+	configure(terminal, conf)
 
 	gtk.Main()
 }

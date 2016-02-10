@@ -18,6 +18,24 @@ Develop :
 *nothing*
 
 
+## Configuration
+
+Configuration use [toml][] format. File is located into `$HOME/.config/mert/mert.toml`.
+
+Example:
+
+```toml
+font = "Monospace 10"
+
+[theme]
+foreground = "#ffffff"
+foreground_bold = "#ffffff"
+background = "#000000"
+cursor = "#999999"
+palette = "#666666;#CC6699;#99CC66;#CC9966;#6699CC;#9966CC;#66CC99;#CCCCCC;#999999;#FF99CC;#CF062B;#CCFF99;#FFCC99;#99CCFF;#CC99FF;#99FFCC;#FFFFFF"
+
+```
+
 ## Development
 
 * Initialize environment
@@ -53,4 +71,8 @@ A [changelog](ChangeLog.md) is available
 Nicolas Lamirault <nicolas.lamirault@gmail.com>
 
 
+
+
 [badge-license]: https://img.shields.io/badge/license-Apache2-green.svg?style=flat
+
+[toml]: https://github.com/toml-lang/toml
