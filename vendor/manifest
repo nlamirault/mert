@@ -1,0 +1,40 @@
+{
+	"version": 0,
+	"dependencies": [
+		{
+			"importpath": "github.com/mattn/go-gtk/gdk",
+			"repository": "https://github.com/mattn/go-gtk",
+			"revision": "d0cfc7414be08415c320550ffc01f7e584be818e",
+			"branch": "master",
+			"path": "/gdk"
+		},
+		{
+			"importpath": "github.com/mattn/go-gtk/gdkpixbuf",
+			"repository": "https://github.com/mattn/go-gtk",
+			"revision": "d0cfc7414be08415c320550ffc01f7e584be818e",
+			"branch": "master",
+			"path": "/gdkpixbuf"
+		},
+		{
+			"importpath": "github.com/mattn/go-gtk/glib",
+			"repository": "https://github.com/mattn/go-gtk",
+			"revision": "d0cfc7414be08415c320550ffc01f7e584be818e",
+			"branch": "master",
+			"path": "/glib"
+		},
+		{
+			"importpath": "github.com/mattn/go-gtk/gtk",
+			"repository": "https://github.com/mattn/go-gtk",
+			"revision": "d0cfc7414be08415c320550ffc01f7e584be818e",
+			"branch": "master",
+			"path": "/gtk"
+		},
+		{
+			"importpath": "github.com/mattn/go-gtk/pango",
+			"repository": "https://github.com/mattn/go-gtk",
+			"revision": "d0cfc7414be08415c320550ffc01f7e584be818e",
+			"branch": "master",
+			"path": "/pango"
+		}
+	]
+}
