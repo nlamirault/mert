@@ -59,33 +59,32 @@ func getConfigurationFile() string {
 func configure(t vte3.Terminal, conf *config.Configuration) {
 	t.SetFont(conf.Font)
 	t.SetColors(conf.Theme.Foreground, conf.Theme.Background, conf.Theme.Palette)
-	// t.SetColorForeground(conf.Theme.Foreground)
-	// t.SetColorBackground(conf.Theme.Background)
 	t.SetColorCursor(conf.Theme.Cursor)
 }
 
 func runGUI(argv []string) {
-	window := gtk.NewWindow(gtk.WINDOW_TOPLEVEL)
-	window.SetTitle(getApplicationTitle())
-	window.Connect("destroy", gtk.MainQuit)
-
-	terminal := vte3.NewTerminal()
-	widget := terminal.VteToGtk()
-	terminal.Fork(argv)
-	widget.Connect("child-exited", gtk.MainQuit)
-
-	window.Add(widget)
-
-	window.SetSizeRequest(defaultWinWidth, defaultWinHeight)
-	window.ShowAll()
-
 	conf, err := config.Load(getConfigurationFile())
 	if err != nil {
 		log.Printf("[WARN] No configuration file or invalid configuration. Use default settings")
 		conf = config.New()
 	}
+
+	window := gtk.NewWindow(gtk.WINDOW_TOPLEVEL)
+	window.SetTitle(getApplicationTitle())
+	terminal := vte3.NewTerminal()
+	widget := terminal.VteToGtk()
+
+	// Events
+	window.Connect("destroy", gtk.MainQuit)
+	widget.Connect("child-exited", gtk.MainQuit)
+
+	window.Add(widget)
+	window.SetSizeRequest(defaultWinWidth, defaultWinHeight)
+	window.ShowAll()
+
 	configure(terminal, conf)
 
+	terminal.Fork(argv)
 	gtk.Main()
 }
 
