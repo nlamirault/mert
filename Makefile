@@ -123,4 +123,4 @@ binaries: gox
 # for goprojectile
 .PHONY: gopath
 gopath:
-	@echo GOPATH=`pwd`:`pwd`/vendor
+	@echo `pwd`:`pwd`/vendor
