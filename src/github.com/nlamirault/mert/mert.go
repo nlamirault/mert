@@ -20,12 +20,14 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"unsafe"
 
 	"github.com/mattn/go-gtk/gdk"
 	"github.com/mattn/go-gtk/glib"
 	"github.com/mattn/go-gtk/gtk"
 
 	"github.com/nlamirault/mert/config"
+	"github.com/nlamirault/mert/events"
 	"github.com/nlamirault/mert/version"
 	"github.com/nlamirault/mert/vte3"
 )
@@ -57,7 +59,7 @@ func getConfigurationFile() string {
 }
 
 func configure(t vte3.Terminal, conf *config.Configuration) {
-	t.SetFont(conf.Font)
+	t.SetFontFromString(conf.Font)
 	t.SetColors(conf.Theme.Foreground, conf.Theme.Background, conf.Theme.Palette)
 	t.SetColorCursor(conf.Theme.Cursor)
 }
@@ -74,9 +76,26 @@ func runGUI(argv []string) {
 	terminal := vte3.NewTerminal()
 	widget := terminal.VteToGtk()
 
+	keyboardEventsChan := make(chan *events.KeyPressEvent)
+
 	// Events
 	window.Connect("destroy", gtk.MainQuit)
 	widget.Connect("child-exited", gtk.MainQuit)
+	window.Connect("key-press-event", func(ctx *glib.CallbackContext) {
+		arg := ctx.Args(0)
+		kev := *(**gdk.EventKey)(unsafe.Pointer(&arg))
+		kpe := events.KeyPressEvent{int(kev.Keyval), 0}
+		if (gdk.ModifierType(kev.State) & gdk.CONTROL_MASK) != 0 {
+			kpe.Modifier = gdk.CONTROL_MASK
+		}
+		keyboardEventsChan <- &kpe
+	})
+	widget.Connect("decrease-font-size", func() {
+		log.Printf("[DEBUG] Font -------")
+	})
+	widget.Connect("increase-font-size", func() {
+		log.Printf("[DEBUG] Font +++++++")
+	})
 
 	window.Add(widget)
 	window.SetSizeRequest(defaultWinWidth, defaultWinHeight)
@@ -85,6 +104,10 @@ func runGUI(argv []string) {
 	configure(terminal, conf)
 
 	terminal.Fork(argv)
+
+	// Handlers
+	go events.KeyboardHandler(keyboardEventsChan, terminal)
+
 	gtk.Main()
 }
 
