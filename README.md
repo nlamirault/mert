@@ -17,6 +17,14 @@ Develop :
 
 *nothing*
 
+## Installation
+
+You can download the binaries :
+
+* Architecture i386 [ [linux](https://bintray.com/artifact/download/nlamirault/oss/enigma_linux_386) / [freebsd](https://bintray.com/artifact/download/nlamirault/oss/enigma_freebsd_386) / [netbsd](https://bintray.com/artifact/download/nlamirault/oss/enigma_netbsd_386) / [openbsd](https://bintray.com/artifact/download/nlamirault/oss/enigma_openbsd_386) ]
+* Architecture amd64 [ [linux](https://bintray.com/artifact/download/nlamirault/oss/enigma_linux_amd64) / [freebsd](https://bintray.com/artifact/download/nlamirault/oss/enigma_freebsd_amd64) / [netbsd](https://bintray.com/artifact/download/nlamirault/oss/enigma_netbsd_amd64) / [openbsd](https://bintray.com/artifact/download/nlamirault/oss/enigma_openbsd_amd64) ]
+* Architecture arm [ [linux](https://bintray.com/artifact/download/nlamirault/oss/enigma_linux_arm) / [freebsd](https://bintray.com/artifact/download/nlamirault/oss/enigma_freebsd_arm) / [netbsd](https://bintray.com/artifact/download/nlamirault/oss/enigma_netbsd_arm) ]
+
 
 ## Configuration
 
