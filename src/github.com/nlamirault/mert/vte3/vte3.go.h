@@ -17,6 +17,10 @@ static inline void set_string(char** strings, int n, char* str) {
         strings[n] = str;
 }
 
+static gchar* toGstr(char* s) {
+  return (gchar*)s;
+}
+
 static inline char** argv() {
 	char **argv = malloc(sizeof(char*) * 2);
 	argv[0] = "/bin/bash";
