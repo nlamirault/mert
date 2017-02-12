@@ -44,13 +44,13 @@ WARN_COLOR=\033[33;01m
 
 MAKE_COLOR=\033[33;01m%-20s\033[0m
 
-MAIN = github.com/nlamirault/mert
+MAIN = github.com/pilotariak/mert
 SRCS = $(shell git ls-files '*.go' | grep -v '^vendor/')
-PKGS = $(shell glide novendor)
 EXE = $(shell ls mert-*_*)
 
 PACKAGE=$(APP)-$(VERSION)
 ARCHIVE=$(PACKAGE).tar
+PKGS = $(shell go list ./... | grep -v /vendor/)
 
 .DEFAULT_GOAL := help
 
@@ -71,7 +71,6 @@ init: ## Install requirements
 	@go get -u github.com/Masterminds/rmvcsdir
 	@go get -u github.com/golang/lint/golint
 	@go get -u github.com/kisielk/errcheck
-	@go get -u golang.org/x/tools/cmd/oracle
 	@go get -u github.com/mitchellh/gox
 
 .PHONY: deps
